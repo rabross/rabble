@@ -13,5 +13,6 @@ object Versions {
     internal const val json = "20211205"
     internal const val hilt = "2.38.1"
     internal const val activity_compose = "1.4.0"
+    internal const val lifecycle = "2.4.0"
     const val compose = "1.1.1"
 }

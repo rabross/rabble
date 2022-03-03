@@ -22,5 +22,8 @@ object RabbleModule {
     fun provideWordMatcher(): WordMatcher = WordMatcherImpl()
 
     @Provides
-    fun provideGameConfig() = object : GameConfig {}
+    fun provideGameConfig() = object : GameConfig {
+        override val numberOfTries = 3
+        override val wordLength = 5
+    }
 }

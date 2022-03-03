@@ -53,6 +53,7 @@ dependencies {
     implementation(Dependencies.compose_ui_tooling_preview)
     implementation(Dependencies.compose_material)
     implementation(Dependencies.activity_compose)
+    implementation(Dependencies.lifecycle_runtime_ktx)
     kapt(Dependencies.hilt_compiler)
 }
 

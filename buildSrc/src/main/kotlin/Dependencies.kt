@@ -21,5 +21,6 @@ object Dependencies {
     const val compose_foundation = "androidx.compose.foundation:foundation:${Versions.compose}"
     const val compose_foundation_layout = "androidx.compose.foundation:foundation-layout:${Versions.compose}"
     const val activity_compose = "androidx.activity:activity-compose:${Versions.activity_compose}"
+    const val lifecycle_runtime_ktx = "androidx.lifecycle:lifecycle-runtime-ktx:${Versions.lifecycle}"
 
 }
