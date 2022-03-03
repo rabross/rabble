@@ -34,11 +34,25 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = Versions.compose
+    }
 }
 
 dependencies {
     implementation(project(":game"))
     implementation(Dependencies.hilt)
+    implementation(Dependencies.compose_runtime)
+    implementation(Dependencies.compose_ui)
+    debugImplementation(Dependencies.compose_ui_tooling)
+    implementation(Dependencies.compose_ui_tooling_preview)
+    implementation(Dependencies.compose_material)
+    implementation(Dependencies.activity_compose)
     kapt(Dependencies.hilt_compiler)
 }
 
