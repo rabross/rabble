@@ -27,7 +27,7 @@ class GameImpl(private val wordProvider: WordProvider, private val wordMatcher: 
                 state.any { it.length != gameConfig.wordLength} -> Game.State.Invalid(IllegalArgumentException("Attempts must be of length ${gameConfig.wordLength}"))
                 state.size > gameConfig.numberOfTries -> Game.State.Invalid(IllegalArgumentException("Too many attempts. Max attempts is ${gameConfig.numberOfTries}"))
                 else -> {
-                    val resultState = state.map { wordMatcher.match(wordProvider.get(), state[0]) }
+                    val resultState = state.map { attempt -> wordMatcher.match(wordProvider.get(), attempt) }
                     if(resultState.size < gameConfig.numberOfTries) Game.State.Current(resultState)
                     else Game.State.Finish(resultState)
                 }

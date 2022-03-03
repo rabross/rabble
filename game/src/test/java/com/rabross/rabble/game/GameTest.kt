@@ -103,6 +103,18 @@ class GameTest {
         assertExceptionEqual(expected.reason, actual.reason)
     }
 
+    @Test
+    fun `multiple attempts`() = runTest {
+        val mockWordProvider = mock<WordProvider> { onBlocking { get() } doReturn "a" }
+        val mockWordMatcher = mock<WordMatcher> { onBlocking { match(any(), any()) } doReturn listOf(1) }
+        val expected = Game.State.Start
+
+        val sut = GameImpl(mockWordProvider, mockWordMatcher, mock())
+        val actual = sut.state(emptyList())
+
+        assertEquals(expected, actual)
+    }
+
     private fun assertExceptionEqual(expected: Exception, actual: Exception){
         assertThat(actual, `is`(instanceOf(IllegalArgumentException::class.java)))
         assertEquals(expected.message, actual.message)
