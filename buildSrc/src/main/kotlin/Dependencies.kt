@@ -10,6 +10,7 @@ object Dependencies {
     const val robolectric = "org.robolectric:robolectric:${Versions.robolectric}"
     const val mockwebserver = "com.squareup.okhttp3:mockwebserver:${Versions.mockwebserver}"
     const val json = "org.json:json:${Versions.json}"
-
     const val junit = "junit:junit:${Versions.jUnit}"
+    const val hilt = "com.google.dagger:hilt-android:${Versions.hilt}"
+    const val hilt_compiler = "com.google.dagger:hilt-android-compiler:${Versions.hilt}"
 }

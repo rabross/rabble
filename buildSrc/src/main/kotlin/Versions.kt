@@ -11,4 +11,5 @@ object Versions {
     internal const val robolectric = "4.6"
     internal const val mockwebserver = "4.9.3"
     internal const val json = "20211205"
+    internal const val hilt = "2.38.1"
 }
