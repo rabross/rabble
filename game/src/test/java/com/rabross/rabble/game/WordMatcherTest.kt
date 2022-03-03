@@ -58,17 +58,27 @@ class WordMatcherTest {
     }
 
     @Test
-    fun `duplicate letters in answer`() = runTest {
+    fun `duplicate letters in attempt with correct`() = runTest {
         val sut = WordMatcherImpl()
         val word = "sam"
         val attempt = "ssa"
-        val expected = listOf(WordMatcher.TOKEN_CORRECT, WordMatcher.TOKEN_PRESENT, WordMatcher.TOKEN_PRESENT)
+        val expected = listOf(WordMatcher.TOKEN_CORRECT, WordMatcher.TOKEN_ABSENT, WordMatcher.TOKEN_PRESENT)
         val actual = sut.match(word, attempt)
         Assert.assertEquals(expected, actual)
     }
 
     @Test
-    fun `duplicate letters in word and answer same positions`() = runTest {
+    fun `duplicate letters in attempt no correct`() = runTest {
+        val sut = WordMatcherImpl()
+        val word = "sam"
+        val attempt = "ass"
+        val expected = listOf(WordMatcher.TOKEN_PRESENT, WordMatcher.TOKEN_PRESENT, WordMatcher.TOKEN_ABSENT)
+        val actual = sut.match(word, attempt)
+        Assert.assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `duplicate letters in word and attempt same positions`() = runTest {
         val sut = WordMatcherImpl()
         val word = "ssa"
         val attempt = "ssm"
@@ -78,11 +88,21 @@ class WordMatcherTest {
     }
 
     @Test
-    fun `duplicate letters in word and answer different positions`() = runTest {
+    fun `duplicate letters in word and attempt different positions`() = runTest {
         val sut = WordMatcherImpl()
         val word = "ssa"
         val attempt = "sas"
         val expected = listOf(WordMatcher.TOKEN_CORRECT, WordMatcher.TOKEN_PRESENT, WordMatcher.TOKEN_PRESENT)
+        val actual = sut.match(word, attempt)
+        Assert.assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `duplicate letters in word and attempt but no clash`() = runTest {
+        val sut = WordMatcherImpl()
+        val word = "ssam"
+        val attempt = "mass"
+        val expected = listOf(WordMatcher.TOKEN_PRESENT, WordMatcher.TOKEN_PRESENT, WordMatcher.TOKEN_PRESENT, WordMatcher.TOKEN_PRESENT)
         val actual = sut.match(word, attempt)
         Assert.assertEquals(expected, actual)
     }
