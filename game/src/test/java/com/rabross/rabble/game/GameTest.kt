@@ -13,6 +13,16 @@ import org.mockito.kotlin.mock
 class GameTest {
 
     @Test
+    fun `given empty attempts game state returns start state`() = runTest {
+        val expected = Game.State.Start
+
+        val sut = GameImpl(mock(), mock(), mock())
+        val actual = sut.state(emptyList())
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun `given number of attempts meets game config, game state returns finish state`() = runTest {
         val mockWordProvider = mock<WordProvider> { onBlocking { get() } doReturn "a" }
         val mockWordMatcher = mock<WordMatcher> { onBlocking { match(any(), any()) } doReturn listOf(1) }
@@ -48,9 +58,8 @@ class GameTest {
     fun `given word matcher throws error, state is invalid`() = runTest {
         val mockWordProvider = mock<WordProvider> { onBlocking { get() } doReturn "" }
         val mockWordMatcher = mock<WordMatcher> { onBlocking { match(any(), any()) } doThrow IllegalArgumentException() }
-        val mockGameConfig = mock<GameConfig>()
 
-        val sut = GameImpl(mockWordProvider, mockWordMatcher, mockGameConfig)
+        val sut = GameImpl(mockWordProvider, mockWordMatcher, mock())
         val actual = sut.state(listOf("a"))
 
         assertThat(actual, `is`(instanceOf(Game.State.Invalid::class.java)))

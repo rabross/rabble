@@ -10,9 +10,10 @@ typealias GameState = List<List<Int>>
 interface Game {
 
     sealed class State {
-        data class Invalid(val reason: Exception): State()
+        object Start: State()
         data class Current(val match: GameState): State()
         data class Finish(val match: GameState): State()
+        data class Invalid(val reason: Exception): State()
     }
 
     suspend fun state(state: List<String>): State
@@ -22,6 +23,7 @@ class GameImpl(private val wordProvider: WordProvider, private val wordMatcher: 
     override suspend fun state(state: List<String>): Game.State {
         return try {
             when {
+                state.isEmpty() -> Game.State.Start
                 state.any { it.length != gameConfig.wordLength} -> Game.State.Invalid(IllegalArgumentException("Attempts must be of length ${gameConfig.wordLength}"))
                 state.size > gameConfig.numberOfTries -> Game.State.Invalid(IllegalArgumentException("Too many attempts. Max attempts is ${gameConfig.numberOfTries}"))
                 else -> {
