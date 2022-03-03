@@ -5,14 +5,14 @@ interface GameConfig {
     val wordLength: Int get() = 1
 }
 
-typealias GameState = List<List<Int>>
+typealias MatchState = List<List<Int>>
 
 interface Game {
 
     sealed class State {
         object Start: State()
-        data class Current(val match: GameState): State()
-        data class Finish(val match: GameState): State()
+        data class Current(val match: MatchState): State()
+        data class Finish(val match: MatchState): State()
         data class Invalid(val reason: Exception): State()
     }
 
