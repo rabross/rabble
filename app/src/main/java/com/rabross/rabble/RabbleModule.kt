@@ -23,7 +23,7 @@ object RabbleModule {
 
     @Provides
     fun provideGameConfig() = object : GameConfig {
-        override val numberOfTries = 3
+        override val numberOfTries = 6
         override val wordLength = 5
     }
 }
