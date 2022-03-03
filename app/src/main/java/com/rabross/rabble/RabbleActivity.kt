@@ -3,21 +3,13 @@ package com.rabross.rabble
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.rabross.rabble.game.Game
 import com.rabross.rabble.game.GameConfig
@@ -38,7 +30,7 @@ class RabbleActivity : ComponentActivity() {
         mutableStateOf(
             ViewState(
                 gameConfig.numberOfTries,
-                gameConfig.numberOfTries,
+                gameConfig.wordLength,
                 emptyList(),
                 Game.State.Start
             )
@@ -49,10 +41,9 @@ class RabbleActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             Surface(modifier = Modifier.fillMaxSize(), color = Color.White) {
-                Box(modifier = Modifier.padding(24.dp)) {
-                    val state by remember { viewState }
-                    EmptyTileGrid(state)
-                    Game(state)
+                val state by remember { viewState }
+                PlayArea(state = state) { _ ->
+                    viewState.value = viewState.value.copy()
                 }
             }
         }
@@ -91,96 +82,3 @@ data class ViewState(
     val words: WordState,
     val gameState: Game.State
 )
-
-@Composable
-fun Game(state: ViewState) {
-    Column {
-        for (wordIndex in state.words.indices) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                for (letterIndex in state.words[wordIndex].indices) {
-                    when (state.gameState) {
-                        is Game.State.Current -> LetterTile(
-                            letter = state.words[wordIndex][letterIndex],
-                            state = state.gameState.match[wordIndex][letterIndex]
-                        )
-                        is Game.State.Finish -> LetterTile(
-                            letter = state.words[wordIndex][letterIndex],
-                            state = state.gameState.match[wordIndex][letterIndex]
-                        )
-                        is Game.State.Invalid -> { /*noop*/
-                        }
-                        Game.State.Start -> { /*noop*/
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun EmptyTileGrid(state: ViewState) {
-    Column {
-        repeat(state.turns) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                repeat(state.wordLength) {
-                    EmptyTile()
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun RowScope.LetterTile(letter: Char, state: Int) {
-    val color = remember { getColour(state) }
-    BoxWithConstraints(
-        modifier = Modifier
-            .weight(1f, true)
-            .aspectRatio(1f)
-            .padding(4.dp)
-            .background(color),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = letter.uppercase(), color = Color.White, fontWeight = FontWeight.Bold)
-    }
-}
-
-@Composable
-fun RowScope.EmptyTile() {
-    Box(
-        modifier = Modifier
-            .weight(1f, true)
-            .aspectRatio(1f)
-            .padding(3.dp)
-            .border(2.dp, Color(211, 214, 218))
-    )
-}
-
-private fun getColour(state: Int): Color {
-    return when (state) {
-        2 -> Color(106, 170, 100)
-        1 -> Color(202, 181, 87)
-        else -> Color(121, 125, 126)
-    }
-}
-
-val previewViewState = ViewState(
-    6, 5,
-    listOf("hello", "world", "rabbl"), Game.State.Current(
-        listOf(
-            listOf(0, 0, 1, 0, 0),
-            listOf(0, 0, 1, 1, 0),
-            listOf(2, 2, 2, 2, 2),
-        )
-    )
-)
-
-@Preview(name = "game")
-@Composable
-fun GamePreview() {
-    Surface(color = Color.White) {
-        EmptyTileGrid(previewViewState)
-        Game(previewViewState)
-    }
-}
