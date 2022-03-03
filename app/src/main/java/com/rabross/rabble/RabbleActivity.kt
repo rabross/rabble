@@ -34,23 +34,51 @@ class RabbleActivity : ComponentActivity() {
     @Inject
     lateinit var gameConfig: GameConfig
 
-    private val viewState by lazy { mutableStateOf(ViewState(gameConfig.numberOfTries, gameConfig.numberOfTries, emptyList(), Game.State.Start)) }
+    private val viewState by lazy {
+        mutableStateOf(
+            ViewState(
+                gameConfig.numberOfTries,
+                gameConfig.numberOfTries,
+                emptyList(),
+                Game.State.Start
+            )
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val state by remember { viewState }
-            GameGrid(gameConfig.numberOfTries, gameConfig.wordLength)
-            Game(state)
+            Surface(modifier = Modifier.fillMaxSize(), color = Color.White) {
+                Box(modifier = Modifier.padding(24.dp)) {
+                    val state by remember { viewState }
+                    EmptyTileGrid(state)
+                    Game(state)
+                }
+            }
         }
 
         lifecycleScope.launchWhenCreated {
             delay(2000)
-            viewState.value = ViewState(gameConfig.numberOfTries, gameConfig.wordLength, listOf("hello"), game.state(listOf("hello")))
+            viewState.value = ViewState(
+                gameConfig.numberOfTries,
+                gameConfig.wordLength,
+                listOf("hello"),
+                game.state(listOf("hello"))
+            )
             delay(2000)
-            viewState.value = ViewState(gameConfig.numberOfTries, gameConfig.wordLength, listOf("hello", "world"), game.state(listOf("hello", "world")))
+            viewState.value = ViewState(
+                gameConfig.numberOfTries,
+                gameConfig.wordLength,
+                listOf("hello", "world"),
+                game.state(listOf("hello", "world"))
+            )
             delay(2000)
-            viewState.value = ViewState(gameConfig.numberOfTries, gameConfig.wordLength, listOf("hello", "world", "rabbl"), game.state(listOf("hello", "world", "rabbl")))
+            viewState.value = ViewState(
+                gameConfig.numberOfTries,
+                gameConfig.wordLength,
+                listOf("hello", "world", "rabbl"),
+                game.state(listOf("hello", "world", "rabbl"))
+            )
         }
     }
 }
@@ -71,16 +99,18 @@ fun Game(state: ViewState) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 for (letterIndex in state.words[wordIndex].indices) {
                     when (state.gameState) {
-                        is Game.State.Current -> Letter(
+                        is Game.State.Current -> LetterTile(
                             letter = state.words[wordIndex][letterIndex],
                             state = state.gameState.match[wordIndex][letterIndex]
                         )
-                        is Game.State.Finish -> Letter(
+                        is Game.State.Finish -> LetterTile(
                             letter = state.words[wordIndex][letterIndex],
                             state = state.gameState.match[wordIndex][letterIndex]
                         )
-                        is Game.State.Invalid -> { /*noop*/ }
-                        Game.State.Start -> { /*noop*/ }
+                        is Game.State.Invalid -> { /*noop*/
+                        }
+                        Game.State.Start -> { /*noop*/
+                        }
                     }
                 }
             }
@@ -89,12 +119,12 @@ fun Game(state: ViewState) {
 }
 
 @Composable
-fun GameGrid(tries: Int, wordCount: Int) {
+fun EmptyTileGrid(state: ViewState) {
     Column {
-        repeat(tries) {
+        repeat(state.turns) {
             Row(modifier = Modifier.fillMaxWidth()) {
-                repeat(wordCount) {
-                    Cell()
+                repeat(state.wordLength) {
+                    EmptyTile()
                 }
             }
         }
@@ -102,7 +132,7 @@ fun GameGrid(tries: Int, wordCount: Int) {
 }
 
 @Composable
-fun RowScope.Letter(letter: Char, state: Int) {
+fun RowScope.LetterTile(letter: Char, state: Int) {
     val color = remember { getColour(state) }
     BoxWithConstraints(
         modifier = Modifier
@@ -117,13 +147,13 @@ fun RowScope.Letter(letter: Char, state: Int) {
 }
 
 @Composable
-fun RowScope.Cell() {
+fun RowScope.EmptyTile() {
     Box(
         modifier = Modifier
             .weight(1f, true)
             .aspectRatio(1f)
-            .padding(4.dp)
-            .border(2.dp, Color.LightGray)
+            .padding(3.dp)
+            .border(2.dp, Color(211, 214, 218))
     )
 }
 
@@ -150,7 +180,7 @@ val previewViewState = ViewState(
 @Composable
 fun GamePreview() {
     Surface(color = Color.White) {
-        GameGrid(previewViewState.turns,  previewViewState.wordLength)
+        EmptyTileGrid(previewViewState)
         Game(previewViewState)
     }
 }
