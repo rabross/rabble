@@ -20,9 +20,9 @@ val previewViewState = ViewState(
     6, 5,
     listOf("hello", "world", "rabbl"), Game.State.Current(
         listOf(
-            listOf(0, 0, 1, 0, 0),
-            listOf(0, 0, 1, 1, 0),
-            listOf(2, 2, 2, 2, 2),
+            0, 0, 1, 0, 0,
+            0, 0, 1, 1, 0,
+            2, 2, 2, 2, 2,
         )
     )
 )
@@ -107,14 +107,15 @@ fun Game(state: ViewState) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 for (letterIndex in state.words[wordIndex].indices) {
                     val letter = state.words[wordIndex][letterIndex]
+                    val matchIndex = state.wordLength * wordIndex + letterIndex
                     when (state.gameState) {
                         is Game.State.Current -> LetterTile(
                             letter = letter,
-                            state = state.gameState.match[wordIndex][letterIndex]
+                            state = state.gameState.match[matchIndex]
                         )
                         is Game.State.Finish -> LetterTile(
                             letter = letter,
-                            state = state.gameState.match[wordIndex][letterIndex]
+                            state = state.gameState.match[matchIndex]
                         )
                         is Game.State.Invalid -> { /*noop*/
                         }

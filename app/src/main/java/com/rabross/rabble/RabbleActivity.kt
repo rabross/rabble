@@ -54,21 +54,21 @@ class RabbleActivity : ComponentActivity() {
                 gameConfig.numberOfTries,
                 gameConfig.wordLength,
                 listOf("hello"),
-                game.state(listOf("hello"))
+                game.state("hello")
             )
             delay(2000)
             viewState.value = ViewState(
                 gameConfig.numberOfTries,
                 gameConfig.wordLength,
                 listOf("hello", "world"),
-                game.state(listOf("hello", "world"))
+                game.state("helloworld")
             )
             delay(2000)
             viewState.value = ViewState(
                 gameConfig.numberOfTries,
                 gameConfig.wordLength,
                 listOf("hello", "world", "rabbl"),
-                game.state(listOf("hello", "world", "rabbl"))
+                game.state("helloworldrabbl")
             )
         }
     }
