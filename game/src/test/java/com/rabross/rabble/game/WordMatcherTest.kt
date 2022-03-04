@@ -58,11 +58,21 @@ class WordMatcherTest {
     }
 
     @Test
-    fun `duplicate letters in attempt with correct`() = runTest {
+    fun `duplicate letters in attempt with correct when duplicate is first`() = runTest {
         val sut = WordMatcherImpl()
         val word = "sam"
-        val attempt = "ssa"
-        val expected = listOf(WordMatcher.TOKEN_CORRECT, WordMatcher.TOKEN_ABSENT, WordMatcher.TOKEN_PRESENT)
+        val attempt = "sss"
+        val expected = listOf(WordMatcher.TOKEN_CORRECT, WordMatcher.TOKEN_ABSENT, WordMatcher.TOKEN_ABSENT)
+        val actual = sut.match(word, attempt)
+        Assert.assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `duplicate letters in attempt with correct when duplicate is second`() = runTest {
+        val sut = WordMatcherImpl()
+        val word = "sam"
+        val attempt = "aaa"
+        val expected = listOf(WordMatcher.TOKEN_ABSENT, WordMatcher.TOKEN_CORRECT, WordMatcher.TOKEN_ABSENT)
         val actual = sut.match(word, attempt)
         Assert.assertEquals(expected, actual)
     }
@@ -103,6 +113,16 @@ class WordMatcherTest {
         val word = "ssam"
         val attempt = "mass"
         val expected = listOf(WordMatcher.TOKEN_PRESENT, WordMatcher.TOKEN_PRESENT, WordMatcher.TOKEN_PRESENT, WordMatcher.TOKEN_PRESENT)
+        val actual = sut.match(word, attempt)
+        Assert.assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `duplicate separate but not first letter`() = runTest {
+        val sut = WordMatcherImpl()
+        val word = "sama"
+        val attempt = "aaaa"
+        val expected = listOf(WordMatcher.TOKEN_ABSENT, WordMatcher.TOKEN_CORRECT, WordMatcher.TOKEN_ABSENT, WordMatcher.TOKEN_CORRECT)
         val actual = sut.match(word, attempt)
         Assert.assertEquals(expected, actual)
     }

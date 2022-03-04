@@ -21,21 +21,39 @@ class WordMatcherImpl : WordMatcher {
 
     override suspend fun match(solution: String, attempt: String): List<Int> {
         return if (solution.length == attempt.length) {
-            correctPass(solution, attempt).zip(
-                presentPass(solution, attempt, DuplicateChecker(solution))
+            val duplicateChecker = DuplicateChecker(populateDuplicates(solution))
+            correctPass(solution, attempt, duplicateChecker).zip(
+                presentPass(solution, attempt, duplicateChecker)
             ) { v1, v2 -> max(v1, v2) }
         } else throw IllegalArgumentException("Attempt must match solution size")
     }
 
-    private fun correctPass(word: String, attempt: String) =
-        attempt.mapIndexed { i, char -> if (word[i] == char) TOKEN_CORRECT else TOKEN_ABSENT }
+    private fun populateDuplicates(solution: String): MutableMap<Char, Int> {
+        val duplicateMap = mutableMapOf<Char, Int>()
+        solution.forEach {
+            if (duplicateMap.containsKey(it)) duplicateMap[it] = duplicateMap.getValue(it).inc()
+            else duplicateMap[it] = 1
+        }
+        return duplicateMap
+    }
+
+    private fun correctPass(word: String, attempt: String, duplicateChecker: DuplicateChecker) =
+        attempt.mapIndexed { i, char ->
+            if (word[i] == char) TOKEN_CORRECT.also { duplicateChecker.spotted(char) }
+            else TOKEN_ABSENT
+        }
 
     private fun presentPass(word: String, attempt: String, duplicateChecker: DuplicateChecker) =
-        attempt.map { char -> if (word.contains(char) && !duplicateChecker.isDuplicate(char)) TOKEN_PRESENT else TOKEN_ABSENT }
+        attempt.mapIndexed { i, char ->
+            if (word.contains(char)
+                && duplicateChecker.hasDuplicate(char)
+                && word[i] != char
+            ) TOKEN_PRESENT.also { duplicateChecker.spotted(char) }
+            else TOKEN_ABSENT
+        }
 
-    class DuplicateChecker(private val seedChars: String) {
-        private val seenChars = mutableListOf<Char>()
-        fun isDuplicate(char: Char) =
-            seenChars.count { seen -> seen == char } >= seedChars.count { seed -> seed == char }.also { seenChars.add(char) }
+    class DuplicateChecker(private val duplicateMap: MutableMap<Char, Int>) {
+        fun hasDuplicate(char: Char): Boolean = duplicateMap[char]?.let { it > 0 } ?: false
+        fun spotted(char: Char) { duplicateMap[char] = duplicateMap.getValue(char).dec() }
     }
 }
