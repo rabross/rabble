@@ -1,6 +1,7 @@
 package com.rabross.rabble
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,13 +9,13 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.lifecycleScope
 import com.rabross.rabble.game.Game
 import com.rabross.rabble.game.GameConfig
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -39,37 +40,25 @@ class RabbleActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+
         setContent {
             Surface(modifier = Modifier.fillMaxSize(), color = Color.White) {
                 val state by remember { viewState }
-                PlayArea(state = state) { _ ->
-                    viewState.value = viewState.value.copy()
+                val coroutineScope = rememberCoroutineScope()
+                PlayArea(state = state) { text ->
+                    coroutineScope.launch {
+                        if (text.length % gameConfig.wordLength == 0) {
+                            viewState.value = ViewState(
+                                gameConfig.numberOfTries,
+                                gameConfig.wordLength,
+                                text.chunked(gameConfig.wordLength),
+                                game.state(text)
+                            )
+                        }
+                    }
                 }
             }
-        }
-
-        lifecycleScope.launchWhenCreated {
-            delay(2000)
-            viewState.value = ViewState(
-                gameConfig.numberOfTries,
-                gameConfig.wordLength,
-                listOf("hello"),
-                game.state("hello")
-            )
-            delay(2000)
-            viewState.value = ViewState(
-                gameConfig.numberOfTries,
-                gameConfig.wordLength,
-                listOf("hello", "world"),
-                game.state("helloworld")
-            )
-            delay(2000)
-            viewState.value = ViewState(
-                gameConfig.numberOfTries,
-                gameConfig.wordLength,
-                listOf("hello", "world", "rabbl"),
-                game.state("helloworldrabbl")
-            )
         }
     }
 }

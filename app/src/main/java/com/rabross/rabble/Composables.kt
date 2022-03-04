@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,8 +40,13 @@ fun GamePreview() {
 @Composable
 fun PlayArea(modifier: Modifier = Modifier.padding(12.dp), state: ViewState, onTextChange: (String) -> Unit) {
     Column(modifier = modifier) {
+        val text = remember { mutableStateOf("") }
+        TextField(modifier = Modifier.fillMaxWidth().padding(12.dp), value = text.value, onValueChange = {
+            text.value = it
+            onTextChange.invoke(it)
+        })
+        //Keyboard(modifier = modifier, state = state, onTextChange = onTextChange)
         GameBoard(modifier = modifier, state = state)
-        Keyboard(modifier = modifier, state = state, onTextChange = onTextChange)
     }
 }
 
@@ -62,7 +69,10 @@ fun Keyboard(modifier: Modifier, state: ViewState, onTextChange: (String) -> Uni
             }
             Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceEvenly) {
                 val topLine = "zxcvbnm"
-                Card(modifier = Modifier.fillMaxWidth().weight(1f).padding(3.dp), backgroundColor = keyColor) {
+                Card(modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(3.dp), backgroundColor = keyColor) {
                     BoxWithConstraints(contentAlignment = Alignment.Center) {
                         Text(text = "MMMMM", color = keyColor) //Keeps keys the same size
                     }
@@ -70,7 +80,10 @@ fun Keyboard(modifier: Modifier, state: ViewState, onTextChange: (String) -> Uni
                 for(letter in topLine) {
                     Key(letter)
                 }
-                Card(modifier = Modifier.fillMaxWidth().weight(1f).padding(3.dp), backgroundColor = keyColor) {
+                Card(modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(3.dp), backgroundColor = keyColor) {
                     BoxWithConstraints(contentAlignment = Alignment.Center) {
                         Text(text = "MMMMM", color = keyColor) //Keeps keys the same size
                     }
@@ -84,7 +97,11 @@ fun Keyboard(modifier: Modifier, state: ViewState, onTextChange: (String) -> Uni
 @Composable
 fun RowScope.Key(letter: Char) {
     val keyColor = Color(211, 214, 218)
-    Card(modifier = Modifier.aspectRatio(0.8f).fillMaxWidth().weight(1f).padding(3.dp), backgroundColor = keyColor) {
+    Card(modifier = Modifier
+        .aspectRatio(0.8f)
+        .fillMaxWidth()
+        .weight(1f)
+        .padding(3.dp), backgroundColor = keyColor) {
         BoxWithConstraints(contentAlignment = Alignment.Center) {
             Text(text = "M", color = keyColor) //Keeps keys the same size
             Text(text = letter.uppercase(), color = Color(94, 95, 97))
