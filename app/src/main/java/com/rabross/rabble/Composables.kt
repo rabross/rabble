@@ -4,9 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,72 +38,105 @@ fun GamePreview() {
 }
 
 @Composable
-fun PlayArea(modifier: Modifier = Modifier.padding(12.dp), state: ViewState, onTextChange: (String) -> Unit) {
+fun PlayArea(
+    modifier: Modifier = Modifier.padding(12.dp),
+    state: ViewState,
+    onTextChange: (String) -> Unit
+) {
     Column(modifier = modifier) {
-        val text = remember { mutableStateOf("") }
-        TextField(modifier = Modifier.fillMaxWidth().padding(12.dp), value = text.value, onValueChange = {
-            text.value = it
-            onTextChange.invoke(it)
-        })
-        //Keyboard(modifier = modifier, state = state, onTextChange = onTextChange)
         GameBoard(modifier = modifier, state = state)
+        Keyboard(modifier = modifier, state = state, onTextChange = onTextChange)
     }
 }
 
 @Composable
 fun Keyboard(modifier: Modifier, state: ViewState, onTextChange: (String) -> Unit) {
     Box(modifier = modifier.fillMaxWidth()) {
+        val text = remember { mutableStateOf("") }
+        val onKeyClick: (Char) -> Unit = { letter ->
+            text.value = text.value + letter
+            onTextChange(text.value)
+        }
+        val onBackSpaceClick = {
+            text.value = text.value.dropLast(1)
+            onTextChange(text.value)
+        }
         Column(verticalArrangement = Arrangement.Top) {
-            val keyColor = Color(211, 214, 218)
-            Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceEvenly) {
-                val topLine = "qwertyuiop"
-                for(letter in topLine) {
-                    Key(letter)
-                }
+            KeyboardRow1(onKeyClick)
+            KeyboardRow2(onKeyClick)
+            KeyboardRow3(onKeyClick, onBackSpaceClick)
+        }
+    }
+}
+
+@Composable
+private fun KeyboardRow1(onClick: (Char) -> Unit) {
+    Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceEvenly) {
+        val letters = "qwertyuiop"
+        for (letter in letters) {
+            Key(letter, onClick)
+        }
+    }
+}
+
+@Composable
+private fun KeyboardRow2(onClick: (Char) -> Unit) {
+    Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceEvenly) {
+        val letters = "asdfghjkl"
+        for (letter in letters) {
+            Key(letter, onClick)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun KeyboardRow3(
+    onClick: (Char) -> Unit,
+    onBackSpaceClick: () -> Unit
+) {
+    Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceEvenly) {
+        val letters = "zxcvbnm"
+        val keyColor = Color(211, 214, 218)
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(3.dp), backgroundColor = keyColor
+        ) {
+            BoxWithConstraints(contentAlignment = Alignment.Center) {
+                Text(text = "MMMMM", color = Color(211, 214, 218))
+                Text(text = "^", color = Color(94, 95, 97))
             }
-            Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceEvenly) {
-                val topLine = "asdfghjkl"
-                for(letter in topLine) {
-                    Key(letter)
-                }
-            }
-            Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceEvenly) {
-                val topLine = "zxcvbnm"
-                Card(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(3.dp), backgroundColor = keyColor) {
-                    BoxWithConstraints(contentAlignment = Alignment.Center) {
-                        Text(text = "MMMMM", color = keyColor) //Keeps keys the same size
-                    }
-                }
-                for(letter in topLine) {
-                    Key(letter)
-                }
-                Card(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(3.dp), backgroundColor = keyColor) {
-                    BoxWithConstraints(contentAlignment = Alignment.Center) {
-                        Text(text = "MMMMM", color = keyColor) //Keeps keys the same size
-                    }
-                }
+        }
+        for (letter in letters) {
+            Key(letter, onClick)
+        }
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(3.dp), backgroundColor = keyColor, onClick = onBackSpaceClick
+        ) {
+            BoxWithConstraints(contentAlignment = Alignment.Center) {
+                Text(text = "MMMMM", color = Color(211, 214, 218))
+                Text(text = "<", color = Color(94, 95, 97))
             }
         }
     }
 }
 
-
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun RowScope.Key(letter: Char) {
+fun RowScope.Key(letter: Char, onClick: (Char) -> Unit = {}) {
     val keyColor = Color(211, 214, 218)
     Card(modifier = Modifier
         .aspectRatio(0.8f)
         .fillMaxWidth()
         .weight(1f)
-        .padding(3.dp), backgroundColor = keyColor) {
+        .padding(3.dp), backgroundColor = keyColor, onClick = { onClick(letter) }) {
         BoxWithConstraints(contentAlignment = Alignment.Center) {
-            Text(text = "M", color = keyColor) //Keeps keys the same size
+            Text(text = "M", color = keyColor)
             Text(text = letter.uppercase(), color = Color(94, 95, 97))
         }
     }
