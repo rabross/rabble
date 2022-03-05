@@ -2,6 +2,7 @@ package com.rabross.rabble.game
 
 import com.rabross.rabble.game.WordMatcher.Companion.TOKEN_ABSENT
 import com.rabross.rabble.game.WordMatcher.Companion.TOKEN_CORRECT
+import com.rabross.rabble.game.WordMatcher.Companion.TOKEN_EMPTY
 import com.rabross.rabble.game.WordMatcher.Companion.TOKEN_PRESENT
 import kotlin.math.max
 
@@ -11,6 +12,7 @@ interface WordMatcher {
         const val TOKEN_CORRECT = 2
         const val TOKEN_PRESENT = 1
         const val TOKEN_ABSENT = 0
+        const val TOKEN_EMPTY = -1
     }
 
     @Throws(IllegalArgumentException::class)
@@ -20,30 +22,32 @@ interface WordMatcher {
 class WordMatcherImpl : WordMatcher {
 
     override suspend fun match(solution: String, guess: String): List<Int> {
-        return if (solution.length == guess.length) {
-            val duplicateChecker = DuplicateChecker(solution)
-            correctPass(solution, guess, duplicateChecker)
-                .zip(presentPass(solution, guess, duplicateChecker)) { v1, v2 -> max(v1, v2) }
-        } else throw IllegalArgumentException("Guess must match solution size")
+        val adaptedGuess = guess.adaptSize(solution).joinToString("")
+        val duplicateChecker = DuplicateChecker(solution)
+        return correctPass(solution, adaptedGuess, duplicateChecker)
+            .zip(presentPass(solution, adaptedGuess, duplicateChecker)) { v1, v2 -> max(v1, v2) }
     }
+
+    private fun String.adaptSize(solution: String) = solution.mapIndexed { index, _ -> getOrNull(index)?.let { it } ?: " " }
 
     private fun correctPass(word: String, guess: String, duplicateChecker: DuplicateChecker) =
         guess.mapIndexed { i, char ->
             if (char.isCorrectAt(i, word)) TOKEN_CORRECT
                 .also { duplicateChecker.seen(char) }
-            else TOKEN_ABSENT
+            else char.absentElseEmpty()
         }
 
     private fun presentPass(word: String, guess: String, duplicateChecker: DuplicateChecker) =
         guess.mapIndexed { i, char ->
             if (char.isPresentIn(word) && duplicateChecker.hasDuplicate(char) && char.isNotCorrectAt(i, word)) TOKEN_PRESENT
                 .also { duplicateChecker.seen(char) }
-            else TOKEN_ABSENT
+            else char.absentElseEmpty()
         }
 
     private fun Char.isCorrectAt(index: Int, word: String) = word[index] == this
     private fun Char.isNotCorrectAt(index: Int, word: String) = word[index] != this
     private fun Char.isPresentIn(word: String) = word.contains(this)
+    private fun Char.absentElseEmpty() = if(isWhitespace()) TOKEN_EMPTY else TOKEN_ABSENT
 
     class DuplicateChecker(solution: String) {
 

@@ -59,22 +59,6 @@ class GameTest {
     }
 
     @Test
-    fun `given word matcher throws error, state is invalid`() = runTest {
-        val mockWordProvider = mock<WordProvider> { onBlocking { get() } doReturn "a" }
-        val mockWordMatcher = mock<WordMatcher> { onBlocking { match(any(), any()) } doThrow IllegalArgumentException() }
-        val mockGameConfig = mock<GameConfig> {
-            on { numberOfTries } doReturn 1
-            on { wordLength } doReturn 1
-        }
-        val sut = GameImpl(mockWordProvider, mockWordMatcher, mockGameConfig)
-        val actual = sut.state("a")
-
-        assertThat(actual, `is`(instanceOf(Game.State.Invalid::class.java)))
-        actual as Game.State.Invalid
-        assertThat(actual.reason, `is`(instanceOf(IllegalArgumentException::class.java)))
-    }
-
-    @Test
     fun `given invalid word length state, state is invalid`() = runTest {
         val mockWordProvider = mock<WordProvider> { onBlocking { get() } doReturn "samuel" }
         val mockWordMatcher = mock<WordMatcher> { onBlocking { match(any(), any()) } doReturn listOf(1) }

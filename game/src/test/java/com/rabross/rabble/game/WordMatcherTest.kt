@@ -127,11 +127,13 @@ class WordMatcherTest {
         Assert.assertEquals(expected, actual)
     }
 
-    @Test(expected = IllegalArgumentException::class)
-    fun `Unequal sizes throws exception`() = runTest {
+    @Test
+    fun `Unequal sizes adapts to solution size and return TOKEN_EMPTY`() = runTest {
         val sut = WordMatcherImpl()
-        val word = "small"
+        val word = "bigger"
         val attempt = "big"
-        sut.match(word, attempt)
+        val expected = listOf(WordMatcher.TOKEN_CORRECT, WordMatcher.TOKEN_CORRECT, WordMatcher.TOKEN_CORRECT, WordMatcher.TOKEN_EMPTY, WordMatcher.TOKEN_EMPTY, WordMatcher.TOKEN_EMPTY)
+        val actual = sut.match(word, attempt)
+        Assert.assertEquals(expected, actual)
     }
 }
