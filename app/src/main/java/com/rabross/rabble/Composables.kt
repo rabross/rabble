@@ -16,11 +16,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.rabross.rabble.game.Game
+import com.rabross.rabble.game.GameState
 
 val previewViewState = ViewState(
     6, 5,
-    listOf("hello", "world", "rabbl"), Game.State.Current(
+    listOf("hello", "world", "rabbl"), GameState.Current(
         listOf(
             0, 0, 1, 0, 0,
             0, 0, 1, 1, 0,
@@ -159,17 +159,17 @@ fun Game(state: ViewState) {
                     val letter = state.words[wordIndex][letterIndex]
                     val matchIndex = state.wordLength * wordIndex + letterIndex
                     when (state.gameState) {
-                        is Game.State.Current -> LetterTile(
+                        is GameState.Current -> LetterTile(
                             letter = letter,
                             state = state.gameState.match[matchIndex]
                         )
-                        is Game.State.Finish -> LetterTile(
+                        is GameState.Finish -> LetterTile(
                             letter = letter,
                             state = state.gameState.match[matchIndex]
                         )
-                        is Game.State.Invalid -> { /*noop*/
+                        is GameState.Invalid -> { /*noop*/
                         }
-                        Game.State.Start -> { /*noop*/
+                        GameState.Start -> { /*noop*/
                         }
                     }
                 }

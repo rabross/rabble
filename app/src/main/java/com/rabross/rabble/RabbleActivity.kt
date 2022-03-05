@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.rabross.rabble.game.Game
 import com.rabross.rabble.game.GameConfig
+import com.rabross.rabble.game.GameState
+import com.rabross.rabble.game.PlayState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,7 +35,7 @@ class RabbleActivity : ComponentActivity() {
                 gameConfig.numberOfTries,
                 gameConfig.wordLength,
                 emptyList(),
-                Game.State.Start
+                GameState.Start
             )
         )
     }
@@ -48,14 +50,13 @@ class RabbleActivity : ComponentActivity() {
                 val coroutineScope = rememberCoroutineScope()
                 PlayArea(state = state) { text ->
                     coroutineScope.launch {
-                        if (text.length % gameConfig.wordLength == 0) {
-                            viewState.value = ViewState(
-                                gameConfig.numberOfTries,
-                                gameConfig.wordLength,
-                                text.chunked(gameConfig.wordLength),
-                                game.state(text)
-                            )
-                        }
+                        val playState = PlayState.Typing(text)
+                        viewState.value = ViewState(
+                            gameConfig.numberOfTries,
+                            gameConfig.wordLength,
+                            text.chunked(gameConfig.wordLength),
+                            game.state(playState)
+                        )
                     }
                 }
             }
@@ -69,5 +70,5 @@ data class ViewState(
     val turns: Int,
     val wordLength: Int,
     val words: WordState,
-    val gameState: Game.State
+    val gameState: GameState
 )
