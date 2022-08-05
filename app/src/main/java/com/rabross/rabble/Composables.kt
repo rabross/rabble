@@ -17,10 +17,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rabross.rabble.game.GameState
+import com.rabross.rabble.game.PlayState
 
 val previewViewState = ViewState(
     6, 5,
-    listOf("hello", "world", "rabbl"), GameState.Current(
+    listOf("hello", "world", "rabbl"), PlayState.Typing(""), GameState.Current(
         listOf(
             0, 0, 1, 0, 0,
             0, 0, 1, 1, 0,
@@ -33,7 +34,7 @@ val previewViewState = ViewState(
 @Composable
 fun GamePreview() {
     Surface(color = Color.White) {
-        PlayArea(state = previewViewState, onTextChange = { /* noop */ })
+        PlayArea(state = previewViewState, onTextChange = { /* noop */ }, onSubmit = { /* noop */ })
     }
 }
 
@@ -41,16 +42,17 @@ fun GamePreview() {
 fun PlayArea(
     modifier: Modifier = Modifier.padding(12.dp),
     state: ViewState,
-    onTextChange: (String) -> Unit
+    onTextChange: (String) -> Unit,
+    onSubmit: (String) -> Unit
 ) {
     Column(modifier = modifier) {
         GameBoard(modifier = modifier, state = state)
-        Keyboard(modifier = modifier, state = state, onTextChange = onTextChange)
+        Keyboard(modifier = modifier, state = state, onTextChange = onTextChange, onSubmit = onSubmit)
     }
 }
 
 @Composable
-fun Keyboard(modifier: Modifier, state: ViewState, onTextChange: (String) -> Unit) {
+fun Keyboard(modifier: Modifier, state: ViewState, onTextChange: (String) -> Unit, onSubmit: (String) -> Unit) {
     Box(modifier = modifier.fillMaxWidth()) {
         val text = remember { mutableStateOf("") }
         val onKeyClick: (Char) -> Unit = { letter ->
@@ -61,30 +63,35 @@ fun Keyboard(modifier: Modifier, state: ViewState, onTextChange: (String) -> Uni
             text.value = text.value.dropLast(1)
             onTextChange(text.value)
         }
+        val onSubmitClick = {
+            onSubmit(text.value)
+        }
+        val keyColor = Color(211, 214, 218)
+        val keyTextColor = Color(94, 95, 97)
         Column(verticalArrangement = Arrangement.Top) {
-            KeyboardRow1(onKeyClick)
-            KeyboardRow2(onKeyClick)
-            KeyboardRow3(onKeyClick, onBackSpaceClick)
+            KeyboardRow1(keyColor, keyTextColor, onKeyClick)
+            KeyboardRow2(keyColor, keyTextColor, onKeyClick)
+            KeyboardRow3(keyColor, keyTextColor, onKeyClick, onBackSpaceClick, onSubmitClick)
         }
     }
 }
 
 @Composable
-private fun KeyboardRow1(onClick: (Char) -> Unit) {
+private fun KeyboardRow1(keyColor: Color, keyTextColor: Color, onKeyClick: (Char) -> Unit) {
     Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceEvenly) {
         val letters = "qwertyuiop"
         for (letter in letters) {
-            Key(letter, onClick)
+            Key(letter, keyColor, keyTextColor, onKeyClick)
         }
     }
 }
 
 @Composable
-private fun KeyboardRow2(onClick: (Char) -> Unit) {
+private fun KeyboardRow2(keyColor: Color, keyTextColor: Color, onKeyClick: (Char) -> Unit) {
     Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceEvenly) {
         val letters = "asdfghjkl"
         for (letter in letters) {
-            Key(letter, onClick)
+            Key(letter, keyColor, keyTextColor, onKeyClick)
         }
     }
 }
@@ -92,25 +99,26 @@ private fun KeyboardRow2(onClick: (Char) -> Unit) {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun KeyboardRow3(
-    onClick: (Char) -> Unit,
-    onBackSpaceClick: () -> Unit
+    keyColor: Color, keyTextColor: Color,
+    onKeyClick: (Char) -> Unit,
+    onBackSpaceClick: () -> Unit,
+    onSubmit: () -> Unit
 ) {
     Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceEvenly) {
         val letters = "zxcvbnm"
-        val keyColor = Color(211, 214, 218)
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .padding(3.dp), backgroundColor = keyColor
+                .padding(3.dp), backgroundColor = keyColor, onClick = onSubmit
         ) {
             BoxWithConstraints(contentAlignment = Alignment.Center) {
-                Text(text = "MMMMM", color = Color(211, 214, 218))
-                Text(text = "^", color = Color(94, 95, 97))
+                Text(text = "MMMMM", color = keyColor)
+                Text(text = "^", color = keyTextColor)
             }
         }
         for (letter in letters) {
-            Key(letter, onClick)
+            Key(letter, keyColor, keyTextColor, onKeyClick)
         }
         Card(
             modifier = Modifier
@@ -119,8 +127,8 @@ private fun KeyboardRow3(
                 .padding(3.dp), backgroundColor = keyColor, onClick = onBackSpaceClick
         ) {
             BoxWithConstraints(contentAlignment = Alignment.Center) {
-                Text(text = "MMMMM", color = Color(211, 214, 218))
-                Text(text = "<", color = Color(94, 95, 97))
+                Text(text = "MMMMM", color = keyColor)
+                Text(text = "<", color = keyTextColor)
             }
         }
     }
@@ -128,8 +136,7 @@ private fun KeyboardRow3(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun RowScope.Key(letter: Char, onClick: (Char) -> Unit = {}) {
-    val keyColor = Color(211, 214, 218)
+fun RowScope.Key(letter: Char, keyColor: Color, keyTextColor: Color, onClick: (Char) -> Unit) {
     Card(modifier = Modifier
         .aspectRatio(0.8f)
         .fillMaxWidth()
@@ -137,7 +144,7 @@ fun RowScope.Key(letter: Char, onClick: (Char) -> Unit = {}) {
         .padding(3.dp), backgroundColor = keyColor, onClick = { onClick(letter) }) {
         BoxWithConstraints(contentAlignment = Alignment.Center) {
             Text(text = "M", color = keyColor)
-            Text(text = letter.uppercase(), color = Color(94, 95, 97))
+            Text(text = letter.uppercase(), color = keyTextColor)
         }
     }
 }
@@ -164,13 +171,11 @@ fun Game(state: ViewState) {
                             state = state.gameState.match[matchIndex]
                         )
                         is GameState.Finish -> LetterTile(
-                            letter = letter,
-                            state = state.gameState.match[matchIndex]
-                        )
-                        is GameState.Invalid -> { /*noop*/
-                        }
-                        GameState.Start -> { /*noop*/
-                        }
+                                letter = letter,
+                                state = state.gameState.match[matchIndex]
+                            )
+                        is GameState.Invalid -> { /*noop*/ }
+                        GameState.Start -> { /*noop*/ }
                     }
                 }
             }
@@ -193,16 +198,17 @@ fun EmptyTileGrid(state: ViewState) {
 
 @Composable
 fun RowScope.LetterTile(letter: Char, state: Int) {
-    val color = remember { getColour(state) }
+    val tileColor = getTileColour(state)
+    val textColor = getLetterColour(state)
     BoxWithConstraints(
         modifier = Modifier
             .weight(1f, true)
             .aspectRatio(1f)
             .padding(4.dp)
-            .background(color),
+            .background(tileColor),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = letter.uppercase(), color = Color.White, fontWeight = FontWeight.Bold)
+        Text(text = letter.uppercase(), color = textColor, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -217,10 +223,18 @@ fun RowScope.EmptyTile() {
     )
 }
 
-private fun getColour(state: Int): Color {
+private fun getTileColour(state: Int): Color {
     return when (state) {
         2 -> Color(106, 170, 100)
         1 -> Color(201, 180, 88)
+        -1 -> Color(0,0,0,0)
         else -> Color(120, 124, 125)
+    }
+}
+
+private fun getLetterColour(state: Int): Color {
+    return when (state) {
+        -1 -> Color.Black
+        else -> Color.White
     }
 }

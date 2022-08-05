@@ -35,6 +35,7 @@ class RabbleActivity : ComponentActivity() {
                 gameConfig.numberOfTries,
                 gameConfig.wordLength,
                 emptyList(),
+                PlayState.Typing(""),
                 GameState.Start
             )
         )
@@ -48,21 +49,38 @@ class RabbleActivity : ComponentActivity() {
             Surface(modifier = Modifier.fillMaxSize(), color = Color.White) {
                 val state by remember { viewState }
                 val coroutineScope = rememberCoroutineScope()
-                PlayArea(state = state) { text ->
+                PlayArea(state = state, onTextChange = { text ->
                     coroutineScope.launch {
                         val playState = PlayState.Typing(text)
-                        viewState.value = ViewState(
+                        val viewState1 = ViewState(
                             gameConfig.numberOfTries,
                             gameConfig.wordLength,
-                            text.chunked(gameConfig.wordLength),
+                            text.chunkedEqualised(gameConfig.wordLength),
+                            playState,
                             game.state(playState)
                         )
+                        viewState.value = viewState1
                     }
-                }
+                }, onSubmit = { text ->
+                    coroutineScope.launch {
+                        val playState = PlayState.Submit(text)
+                        val viewState1 = ViewState(
+                            gameConfig.numberOfTries,
+                            gameConfig.wordLength,
+                            text.chunkedEqualised(gameConfig.wordLength),
+                            playState,
+                            game.state(playState)
+                        )
+                        viewState.value = viewState1
+                    }
+                })
             }
         }
     }
 }
+
+private fun String.chunkedEqualised(wordLength: Int) =
+    chunked(wordLength) { text -> text.padEnd(wordLength, Char(32)).toString() }
 
 typealias WordState = List<String>
 
@@ -70,5 +88,12 @@ data class ViewState(
     val turns: Int,
     val wordLength: Int,
     val words: WordState,
+    val playState: PlayState,
     val gameState: GameState
-)
+
+
+) {
+    override fun equals(other: Any?): Boolean {
+        return false
+    }
+}
