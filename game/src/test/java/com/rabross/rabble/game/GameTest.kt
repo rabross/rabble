@@ -149,7 +149,7 @@ class GameTest {
         val expected = GameState.Current(listOf(-1, -1, -1))
 
         val sut = GameImpl(mock(), mock(), mockGameConfig)
-        val actual = sut.state(PlayState.Typing("eliandsam"))
+        val actual = sut.state(PlayState.Typing("a"))
 
         assertEquals(expected, actual)
     }

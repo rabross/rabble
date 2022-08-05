@@ -28,15 +28,16 @@ class GameImpl(private val wordProvider: WordProvider, private val wordMatcher: 
         val guess = state.text
         return when(state) {
             is PlayState.Typing -> {
-                GameState.Current(
-                    guess.chunked(gameConfig.wordLength).map { attempt ->
-                        if (attempt.length == gameConfig.wordLength) wordMatcher.match(
-                            wordProvider.get(),
-                            attempt
-                        )
-                        else buildList { repeat(gameConfig.wordLength) { add(-1) } }
-                    }.flatten()
-                )
+                if(guess.isBlank()){
+                    GameState.Current(emptyMatchState(gameConfig.wordLength))
+                } else {
+                    GameState.Current(
+                        guess.chunked(gameConfig.wordLength).map { attempt ->
+                            if (attempt.length == gameConfig.wordLength) wordMatcher.match(wordProvider.get(), attempt)
+                            else emptyMatchState(gameConfig.wordLength)
+                        }.flatten()
+                    )
+                }
             }
             is PlayState.Submit -> when {
                 gameConfig.isInvalid() -> GameState.Invalid(IllegalArgumentException("Invalid game config"))
@@ -55,4 +56,8 @@ class GameImpl(private val wordProvider: WordProvider, private val wordMatcher: 
     private fun GameConfig.isInvalid() = numberOfTries <= 0 || wordLength <= 0
     private fun GameConfig.isTooLong(guess: String) = guess.length % wordLength != 0
     private fun GameConfig.exceedsMaxTries(guess: String) = guess.length / wordLength > numberOfTries
+
+    companion object {
+        private fun emptyMatchState(size: Int) = buildList { repeat(size) { add(-1) } }
+    }
 }
