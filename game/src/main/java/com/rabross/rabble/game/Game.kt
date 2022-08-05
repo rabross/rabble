@@ -28,7 +28,11 @@ class GameImpl(private val wordProvider: WordProvider, private val wordMatcher: 
     override suspend fun state(state: PlayState): GameState {
         val guess = state.text
         return when(state) {
-            is PlayState.Typing -> GameState.Current(buildList { repeat(gameConfig.wordLength){ add(-1) } })
+            is PlayState.Typing -> GameState.Current(
+                guess.chunked(gameConfig.wordLength).map { attempt ->
+                    if(attempt.length == gameConfig.wordLength) wordMatcher.match(wordProvider.get(), attempt)
+                    else buildList { repeat(gameConfig.wordLength){ add(-1) }}
+            }.flatten())
             is PlayState.Submit -> when {
                 gameConfig.numberOfTries <= 0 || gameConfig.wordLength <= 0 -> GameState.Invalid(IllegalArgumentException("Invalid game config"))
                 guess.isEmpty() -> GameState.Start
