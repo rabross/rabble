@@ -48,17 +48,29 @@ class RabbleActivity : ComponentActivity() {
             Surface(modifier = Modifier.fillMaxSize(), color = Color.White) {
                 val state by remember { viewState }
                 val coroutineScope = rememberCoroutineScope()
-                PlayArea(state = state) { text ->
-                    coroutineScope.launch {
-                        val playState = PlayState.Typing(text)
-                        viewState.value = ViewState(
-                            gameConfig.numberOfTries,
-                            gameConfig.wordLength,
-                            text.chunked(gameConfig.wordLength),
-                            game.state(playState)
-                        )
-                    }
-                }
+                PlayArea(state = state,
+                    onTextChange = { text ->
+                        coroutineScope.launch {
+                            val playState = PlayState.Typing(text)
+                            viewState.value = ViewState(
+                                gameConfig.numberOfTries,
+                                gameConfig.wordLength,
+                                text.chunked(gameConfig.wordLength),
+                                game.state(playState)
+                            )
+                        }
+                    },
+                    onSubmit = { text ->
+                        coroutineScope.launch {
+                            val playState = PlayState.Submit(text)
+                            viewState.value = ViewState(
+                                gameConfig.numberOfTries,
+                                gameConfig.wordLength,
+                                text.chunked(gameConfig.wordLength),
+                                game.state(playState)
+                            )
+                        }
+                    })
             }
         }
     }

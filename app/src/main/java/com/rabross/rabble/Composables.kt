@@ -35,7 +35,7 @@ val previewViewState = ViewState(
 @Composable
 fun GamePreview() {
     Surface(color = Color.White) {
-        PlayArea(state = previewViewState, onTextChange = { /* noop */ })
+        PlayArea(state = previewViewState, onTextChange = {}, onSubmit = {})
     }
 }
 
@@ -43,16 +43,22 @@ fun GamePreview() {
 fun PlayArea(
     modifier: Modifier = Modifier.padding(12.dp),
     state: ViewState,
-    onTextChange: (String) -> Unit
+    onTextChange: (String) -> Unit,
+    onSubmit: (String) -> Unit
 ) {
     Column(modifier = modifier) {
         GameBoard(modifier = modifier, state = state)
-        Keyboard(modifier = modifier, state = state, onTextChange = onTextChange)
+        Keyboard(modifier = modifier, state = state, onTextChange = onTextChange, onSubmit = onSubmit)
     }
 }
 
 @Composable
-fun Keyboard(modifier: Modifier, state: ViewState, onTextChange: (String) -> Unit) {
+fun Keyboard(
+    modifier: Modifier,
+    state: ViewState,
+    onTextChange: (String) -> Unit,
+    onSubmit: (String) -> Unit
+) {
     Box(modifier = modifier.fillMaxWidth()) {
         val text = remember { mutableStateOf("") }
         val onKeyClick: (Char) -> Unit = { letter ->
@@ -63,10 +69,13 @@ fun Keyboard(modifier: Modifier, state: ViewState, onTextChange: (String) -> Uni
             text.value = text.value.dropLast(1)
             onTextChange(text.value)
         }
+        val onSubmitClick = {
+            onSubmit(text.value)
+        }
         Column(verticalArrangement = Arrangement.Top) {
             KeyboardRow1(onKeyClick)
             KeyboardRow2(onKeyClick)
-            KeyboardRow3(onKeyClick, onBackSpaceClick)
+            KeyboardRow3(onKeyClick, onBackSpaceClick, onSubmitClick)
         }
     }
 }
@@ -95,7 +104,8 @@ private fun KeyboardRow2(onClick: (Char) -> Unit) {
 @Composable
 private fun KeyboardRow3(
     onClick: (Char) -> Unit,
-    onBackSpaceClick: () -> Unit
+    onBackSpaceClick: () -> Unit,
+    onSubmitClick: () -> Unit
 ) {
     Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceEvenly) {
         val letters = "zxcvbnm"
@@ -104,7 +114,7 @@ private fun KeyboardRow3(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .padding(3.dp), backgroundColor = keyColor
+                .padding(3.dp), backgroundColor = keyColor, onClick = onSubmitClick
         ) {
             BoxWithConstraints(contentAlignment = Alignment.Center) {
                 Text(text = "MMMMM", color = Color(211, 214, 218))
