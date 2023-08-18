@@ -173,6 +173,9 @@ fun Game(state: ViewState) {
                         }
                     }
                 }
+                repeat(state.wordLength - state.words[wordIndex].length){
+                    EmptyTile()
+                }
             }
         }
     }
