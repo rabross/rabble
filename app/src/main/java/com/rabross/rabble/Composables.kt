@@ -16,14 +16,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.rabross.rabble.game.GameState
 
 val previewViewState = ViewState(
     6, 5,
-    listOf("hello", "world", "rabbl"), GameState.Current(
+    listOf("hello", "world", "type", "rabbl"), GameState.Current(
         listOf(
             0, 0, 1, 0, 0,
             0, 0, 1, 1, 0,
+            -1,-1,-1,-1,-1,
             2, 2, 2, 2, 2,
         )
     )
@@ -167,10 +169,8 @@ fun Game(state: ViewState) {
                             letter = letter,
                             state = state.gameState.match[matchIndex]
                         )
-                        is GameState.Invalid -> { /*noop*/
-                        }
-                        GameState.Start -> { /*noop*/
-                        }
+                        is GameState.Invalid -> { /*noop*/ }
+                        GameState.Start -> { /*noop*/ }
                     }
                 }
                 repeat(state.wordLength - state.words[wordIndex].length){
@@ -221,7 +221,7 @@ fun RowScope.UnmatchedTile(letter: Char) {
             .weight(1f, true)
             .aspectRatio(1f)
             .padding(3.dp)
-            .border(3.dp, Color(135, 138, 140)),
+            .border(3.dp, colorBorderUnmatched),
         contentAlignment = Alignment.Center
     ) {
         Text(text = letter.uppercase(), color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 22.sp)
@@ -235,15 +235,21 @@ fun RowScope.EmptyTile() {
             .weight(1f, true)
             .aspectRatio(1f)
             .padding(3.dp)
-            .border(3.dp, Color(211, 214, 218))
+            .border(3.dp, colorBorderEmpty)
     )
 }
 
 private fun getColour(state: Int): Color {
     return when (state) {
-        2 -> Color(106, 170, 100)
-        1 -> Color(201, 180, 88)
-        0 -> Color(120, 124, 126)
-        else -> Color(211, 214, 218)
+        2 -> colorMatch
+        1 -> colorPresent
+        0 -> colorAbsent
+        else -> Color.Transparent
     }
 }
+
+private val colorMatch = Color(106, 170, 100)
+private val colorPresent = Color(201, 180, 88)
+private val colorAbsent = Color(120, 124, 126)
+private val colorBorderUnmatched = Color(135, 138, 140)
+private val colorBorderEmpty = Color(211, 214, 218)

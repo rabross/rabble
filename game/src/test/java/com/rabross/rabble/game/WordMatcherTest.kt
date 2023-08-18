@@ -3,7 +3,6 @@ package com.rabross.rabble.game
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Test
-import java.lang.IllegalArgumentException
 import java.util.*
 
 class WordMatcherTest {
@@ -18,7 +17,7 @@ class WordMatcherTest {
     }
 
     @Test
-    fun `given missmatching words, match returns full absent`() = runTest {
+    fun `given mismatching words, match returns full absent`() = runTest {
         val sut = WordMatcherImpl()
         val word = "eli"
         val attempt = "sam"
