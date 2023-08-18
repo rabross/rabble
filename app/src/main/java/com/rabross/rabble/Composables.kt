@@ -196,16 +196,35 @@ fun EmptyTileGrid(state: ViewState) {
 
 @Composable
 fun RowScope.LetterTile(letter: Char, state: Int) {
-    val color = remember { getColour(state) }
-    BoxWithConstraints(
+    if(state == -1){
+        UnmatchedTile(letter = letter)
+    } else {
+        val color = remember { getColour(state) }
+        Box(
+            modifier = Modifier
+                .weight(1f, true)
+                .aspectRatio(1f)
+                .padding(3.dp)
+                .background(color)
+                .border(3.dp, color),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = letter.uppercase(), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+        }
+    }
+}
+
+@Composable
+fun RowScope.UnmatchedTile(letter: Char) {
+    Box(
         modifier = Modifier
             .weight(1f, true)
             .aspectRatio(1f)
-            .padding(4.dp)
-            .background(color),
+            .padding(3.dp)
+            .border(3.dp, Color(135, 138, 140)),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = letter.uppercase(), color = Color.White, fontWeight = FontWeight.Bold)
+        Text(text = letter.uppercase(), color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 22.sp)
     }
 }
 
@@ -216,7 +235,7 @@ fun RowScope.EmptyTile() {
             .weight(1f, true)
             .aspectRatio(1f)
             .padding(3.dp)
-            .border(2.dp, Color(211, 214, 218))
+            .border(3.dp, Color(211, 214, 218))
     )
 }
 
@@ -224,6 +243,7 @@ private fun getColour(state: Int): Color {
     return when (state) {
         2 -> Color(106, 170, 100)
         1 -> Color(201, 180, 88)
-        else -> Color(120, 124, 125)
+        0 -> Color(120, 124, 126)
+        else -> Color(211, 214, 218)
     }
 }
