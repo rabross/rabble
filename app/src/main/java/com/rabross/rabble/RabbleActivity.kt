@@ -4,41 +4,20 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Surface
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.rabross.rabble.game.Game
-import com.rabross.rabble.game.GameConfig
-import com.rabross.rabble.game.GameState
-import com.rabross.rabble.game.PlayState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class RabbleActivity : ComponentActivity() {
 
-    @Inject
-    lateinit var game: Game
-
-    @Inject
-    lateinit var gameConfig: GameConfig
-
-    private val viewState by lazy {
-        mutableStateOf(
-            ViewState(
-                gameConfig.numberOfTries,
-                gameConfig.wordLength,
-                emptyList(),
-                GameState.Start
-            )
-        )
-    }
+    private val viewModel: RabbleViewModelImpl by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,41 +25,18 @@ class RabbleActivity : ComponentActivity() {
 
         setContent {
             Surface(modifier = Modifier.fillMaxSize(), color = Color.White) {
-                val state by remember { viewState }
+                val state = viewModel.viewState.collectAsState()
                 val coroutineScope = rememberCoroutineScope()
-                PlayArea(state = state,
+                PlayArea(state = state.value,
                     onTextChange = { text ->
-                        coroutineScope.launch {
-                            val playState = PlayState.Typing(text)
-                            viewState.value = ViewState(
-                                gameConfig.numberOfTries,
-                                gameConfig.wordLength,
-                                text.chunked(gameConfig.wordLength),
-                                game.state(playState)
-                            )
-                        }
+                        //todo check if new text is valid
+                        // i.e. disregard extra letters at the end of a line
+                        coroutineScope.launch { viewModel.textChanged(text) }
                     },
                     onSubmit = { text ->
-                        coroutineScope.launch {
-                            val playState = PlayState.Submit(text)
-                            viewState.value = ViewState(
-                                gameConfig.numberOfTries,
-                                gameConfig.wordLength,
-                                text.chunked(gameConfig.wordLength),
-                                game.state(playState)
-                            )
-                        }
+                        coroutineScope.launch { viewModel.submit() }
                     })
             }
         }
     }
 }
-
-typealias WordState = List<String>
-
-data class ViewState(
-    val turns: Int,
-    val wordLength: Int,
-    val words: WordState,
-    val gameState: GameState
-)
