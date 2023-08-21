@@ -37,7 +37,7 @@ class RabbleViewModelImpl @Inject constructor(
             gameConfig.numberOfTries,
             gameConfig.wordLength,
             text.chunked(gameConfig.wordLength),
-            game.state(PlayState.Typing(text))
+            game.play(PlayState.Typing(text))
         )
     }
 
@@ -46,7 +46,7 @@ class RabbleViewModelImpl @Inject constructor(
             gameConfig.numberOfTries,
             gameConfig.wordLength,
             letters.chunked(gameConfig.wordLength),
-            game.state(PlayState.Submit(letters))
+            game.play(PlayState.Submit(letters))
         )
     }
 

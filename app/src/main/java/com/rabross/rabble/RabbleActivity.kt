@@ -29,8 +29,6 @@ class RabbleActivity : ComponentActivity() {
                 val coroutineScope = rememberCoroutineScope()
                 PlayArea(state = state.value,
                     onTextChange = { text ->
-                        //todo check if new text is valid
-                        // i.e. disregard extra letters at the end of a line
                         coroutineScope.launch { viewModel.textChanged(text) }
                     },
                     onSubmit = { text ->

@@ -11,9 +11,8 @@ import dagger.hilt.android.components.ViewModelComponent
 object RabbleModule {
 
     @Provides
-    fun provideGame(wordProvider: WordProvider, wordMatcher: WordMatcher, gameConfig: GameConfig): Game {
-        return GameImpl(wordProvider, wordMatcher, gameConfig)
-    }
+    fun provideGame(wordProvider: WordProvider, wordMatcher: WordMatcher, gameConfig: GameConfig) =
+        Game(wordProvider, wordMatcher, gameConfig)
 
     @Provides
     fun provideWordProvider() = object : WordProvider { override suspend fun get() = "rabbl" }

@@ -22,13 +22,13 @@ interface WordMatcher {
 class WordMatcherImpl : WordMatcher {
 
     override suspend fun match(solution: String, guess: String): List<Int> {
-        val adaptedGuess = guess.adaptSize(solution).joinToString("")
+        val adaptedGuess = guess.matchSize(solution)
         val duplicateChecker = DuplicateChecker(solution)
         return correctPass(solution, adaptedGuess, duplicateChecker)
             .zip(presentPass(solution, adaptedGuess, duplicateChecker)) { v1, v2 -> max(v1, v2) }
     }
 
-    private fun String.adaptSize(solution: String) = solution.mapIndexed { index, _ -> getOrNull(index)?.let { it } ?: " " }
+    private fun String.matchSize(solution: String) = solution.mapIndexed { index, _ -> getOrNull(index) ?: " " }.joinToString("")
 
     private fun correctPass(word: String, guess: String, duplicateChecker: DuplicateChecker) =
         guess.mapIndexed { i, char ->
